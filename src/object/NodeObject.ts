@@ -96,29 +96,7 @@ export class NodeObject extends Container{
             this._board.tint = new Color([r, g, b, a]);
         }
     }
-
-    update(_:number){
-        // if(this._animeObj.target != null){
-        //     let _pos:pc.Vec3 = this.entity.getLocalPosition();
-
-        //     _pos.x += this._animeObj.target.x * (dt/this._animeObj.duration);
-        //     _pos.y += this._animeObj.target.y * (dt/this._animeObj.duration);
-
-        //     this.entity.setPosition(_pos);
-
-        //     this._animeObj.time += dt;
-
-        //     if(this._animeObj.time >= this._animeObj.duration){
-        //         this._animeObj.target = null;
-
-        //         if(this._callback != null)
-        //             this._callback(this);
-
-        //         this._callback = null;
-        //     }
-        // }
-    }
-
+    
     MoveTo(pt:Point, dur:number, _: (node:NodeObject) => void){
         // this._callback = callback;
 

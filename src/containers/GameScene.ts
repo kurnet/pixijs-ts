@@ -22,7 +22,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
     static MAX_BLOCK: number = 7;
     static NODE_SIZE: number = 70;
 
-    private gameData: CoreData;
+    private gameData!: CoreData;
     private nodePercent: NodeData;
     private hintNode?: NodeObject;
 
@@ -37,16 +37,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
 
     constructor(app: Application) {
         super(app);
-        this.gameData = {
-            score: 0,
-            multiply: 1,
-            baseScore: 7,
-            nextVal: 0,
-            step: 0,
-            level: 1,
-            isStarted: false,
-            UsedBlock: 0
-        };
+        
         this.nodePercent = new NodeData(node_precent);
 
         this.on('pointerdown', this.onMouseDown);
@@ -57,7 +48,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
         this.hintNode.eventMode = 'none';
         this.addChild(this.hintNode);
 
-        this.txtNextRow = new Text(`Next Row in : ${this.gameData.step}`);
+        this.txtNextRow = new Text(``);
         this.txtNextRow.anchor.set(1.0, 0);
         this.txtNextRow.x = 620;
         this.txtNextRow.y = 20;
@@ -78,7 +69,16 @@ export class GameSceneContainer extends ScreenBaseContainer {
     }
 
     private resetGame() {
-        console.log(`Screen Size ${this.screenHeight} / ${this.screenWidth}`);
+        this.gameData = {
+            score: 0,
+            multiply: 1,
+            baseScore: 7,
+            nextVal: 0,
+            step: 0,
+            level: 1,
+            isStarted: false,
+            UsedBlock: 0
+        };
 
         const nodeSize = GameSceneContainer.NODE_SIZE;
         const startX = (this.screenWidth - GameSceneContainer.MAX_BLOCK * nodeSize) / 2;
@@ -100,6 +100,10 @@ export class GameSceneContainer extends ScreenBaseContainer {
 
                 _node.gridX = j;
                 _node.gridY = i;
+
+                if(this.ans[j][i]){
+                    this.ans[j][i].destroy();
+                }
 
                 this.ans[j][i] = _node;
 
@@ -136,13 +140,11 @@ export class GameSceneContainer extends ScreenBaseContainer {
                 if (Math.random() > 0.6) {
                     this.ans[x][y].setVal(this.getNewNodeValue(), true);
                     this.gameData.UsedBlock++;
-
-                    console.log(`${x}/${y} : ${this.ans[x][y].Val}`);
                 }
             }
         }
 
-        this.processMarkedNode(this);
+        this.processMarkedNode();
     }
 
     // next node show up 
@@ -190,7 +192,6 @@ export class GameSceneContainer extends ScreenBaseContainer {
                 _res = -1;
             }
         }
-        // this.txtStep.text = "Step : " + this.gameData.step;
         return _res;
     }
 
@@ -237,8 +238,6 @@ export class GameSceneContainer extends ScreenBaseContainer {
         }
         if(i == 7){return false;}
 
-        // wait for scan puzzle need to solve, should be animation here
-        //setTimeout(this.scanPuzzleNeedToSolve, 250, this);
         this.addDummyDropAnime(x, num, _tarNode!);
         return true;
     };
@@ -262,48 +261,56 @@ export class GameSceneContainer extends ScreenBaseContainer {
             _dummy.destroy();
             targetNode.setVal(num);
 
-            this.scanPuzzleNeedToSolve(this);
+            this.scanPuzzleNeedToSolve();
         }).easing(Easing.Quadratic.InOut).start();
     }
 
     // scan puzzle and remark any solve needed
-    private scanPuzzleNeedToSolve(_game: GameSceneContainer) {
+    private scanPuzzleNeedToSolve() {
         let _x: number, _y: number;
         for (_x = 0; _x < GameSceneContainer.MAX_BLOCK; ++_x) {
-            _game.checkVert(_x);
+            this.checkVert(_x);
         }
         for (_y = 0; _y < GameSceneContainer.MAX_BLOCK; ++_y) {
-            _game.checkHori(_y);
+            this.checkHori(_y);
         }
 
         // should be animation play when found detected node to solve
-        setTimeout(_game.processMarkedNode, 300, _game);
+        const cb_timeout = this.processMarkedNode.bind(this);
+
+        setTimeout(cb_timeout, 300);
     }
 
     // remove and sort the empty space out
-    private processMarkedNode(_game: GameSceneContainer) {
-        let _pClean: boolean = _game.CheckAndCleanMarked();
-        let _pSort: boolean = _game.sortBlock();
+    private processMarkedNode() {
+        let _pClean: boolean = this.CheckAndCleanMarked();
+        let _pSort: boolean = this.sortBlock();
         if (_pClean || _pSort) {
             // if any change made on the board have to scan puzzle again until nothing change, and score got multiply
-            _game.gameData.multiply += 4;
-            setTimeout(_game.scanPuzzleNeedToSolve, 200, _game);
+            this.gameData.multiply += 4;
+
+            const cb_timeout = this.scanPuzzleNeedToSolve.bind(this);
+            setTimeout(cb_timeout, 300);
         } else {
-            _game.genNext();
-            let _gameStatus : number = _game.moreStep();
+            this.genNext();
+            let _gameStatus : number = this.moreStep();
             if(!_gameStatus){
                 // happen nothing if the step is not yet need to insert row
-                _game.gameData.multiply = 1;
+                this.gameData.multiply = 1;
                 // this.BlockerEntity.enabled = false;
-                _game.genNext();
+                this.genNext();
 
-                if(!_game.gameData.isStarted){ _game.gameData.isStarted = true; }
+                if(!this.gameData.isStarted){ this.gameData.isStarted = true; }
             }else if(_gameStatus == 1){
                 // insert row at the bottom and scan puzzle again
-                _game.scanPuzzleNeedToSolve(_game);
+                this.scanPuzzleNeedToSolve();
             }else{
                 // no more row can insert or full board dropped make the game over
-                _game.gameData.isStarted = false;
+                this.gameData.isStarted = false;
+
+                const cb_timeout = this.resetGame.bind(this);
+                setTimeout(cb_timeout, 1000);
+                
                 // this.sharedUIMgr.showGameOver(true);
                 //Game Over
             }
