@@ -1,5 +1,5 @@
 // import { Helper } from "../helper/helper";
-import { Application, FederatedPointerEvent, Point, Text } from "pixi.js";
+import { Application, DisplayObjectEvents, FederatedPointerEvent, Point, Text, TextStyle } from "pixi.js";
 import { Helper } from "../helper/helper";
 import { NodeObject } from "../object/NodeObject";
 import { ScreenBaseContainer } from "./SceneBase"
@@ -17,6 +17,8 @@ interface CoreData {
     isStarted: boolean,
     UsedBlock: number
 };
+
+export const EVT_GAME_DONE = "evt_game_done"  as (keyof DisplayObjectEvents);
 
 export class GameSceneContainer extends ScreenBaseContainer {
     static MAX_BLOCK: number = 7;
@@ -46,7 +48,14 @@ export class GameSceneContainer extends ScreenBaseContainer {
 
         this.hintNode = new NodeObject();
         this.hintNode.eventMode = 'none';
+        this.hintNode.setVal(1);        
+        this.hintNode.position.set(150, 165);
         this.addChild(this.hintNode);
+
+        const txtHint = new Text("Next : ");
+        txtHint.anchor.set(0, 0.5);
+        this.addChild(txtHint);
+        txtHint.position.set(75, 200);        
 
         this.txtNextRow = new Text(``);
         this.txtNextRow.anchor.set(1.0, 0);
@@ -61,10 +70,12 @@ export class GameSceneContainer extends ScreenBaseContainer {
 
     }
     override screenInited(): void {
+        super.screenInited();
         this.resetGame();
     }
 
     override addedToScreen(): void {
+        super.addedToScreen();
         this.resetGame();
     }
 
@@ -111,7 +122,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
             }
         }
 
-        this.update(Helper.GetRandomNumber(10, 10));
+        this.updateStep(Helper.GetRandomNumber(10, 10));
         this.randomInit();
     }
 
@@ -276,9 +287,9 @@ export class GameSceneContainer extends ScreenBaseContainer {
         }
 
         // should be animation play when found detected node to solve
-        const cb_timeout = this.processMarkedNode.bind(this);
-
-        setTimeout(cb_timeout, 300);
+        setTimeout(()=>{
+            this.processMarkedNode();
+        }, 300);
     }
 
     // remove and sort the empty space out
@@ -289,8 +300,9 @@ export class GameSceneContainer extends ScreenBaseContainer {
             // if any change made on the board have to scan puzzle again until nothing change, and score got multiply
             this.gameData.multiply += 4;
 
-            const cb_timeout = this.scanPuzzleNeedToSolve.bind(this);
-            setTimeout(cb_timeout, 300);
+            setTimeout(()=>{
+                this.scanPuzzleNeedToSolve();
+            }, 300);
         } else {
             this.genNext();
             let _gameStatus : number = this.moreStep();
@@ -308,8 +320,24 @@ export class GameSceneContainer extends ScreenBaseContainer {
                 // no more row can insert or full board dropped make the game over
                 this.gameData.isStarted = false;
 
-                const cb_timeout = this.resetGame.bind(this);
-                setTimeout(cb_timeout, 1000);
+                const style = new TextStyle({
+                    fill: "#ff0000",
+                    fontFamily: "Comic Sans MS",
+                    fontSize: 64,
+                    fontVariant: "small-caps",
+                    fontWeight: "bold",
+                    strokeThickness: 3
+                });
+                const txtGameOver = new Text('Game Over', style);
+                txtGameOver.anchor.set(0.5, 0.5);
+                txtGameOver.position.set(this.screenWidth/2, this.screenHeight/2);
+                this.addChild(txtGameOver);
+
+                setTimeout(()=>{
+                    this.emit(EVT_GAME_DONE);
+
+                    txtGameOver.destroy();
+                }, 2000);
                 
                 // this.sharedUIMgr.showGameOver(true);
                 //Game Over
