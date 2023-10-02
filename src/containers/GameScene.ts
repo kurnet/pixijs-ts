@@ -1,5 +1,5 @@
 // import { Helper } from "../helper/helper";
-import { Application, FederatedPointerEvent, Point } from "pixi.js";
+import { Application, FederatedPointerEvent, Point, Text } from "pixi.js";
 import { Helper } from "../helper/helper";
 import { NodeObject } from "../object/NodeObject";
 import { ScreenBaseContainer } from "./SceneBase"
@@ -28,6 +28,8 @@ export class GameSceneContainer extends ScreenBaseContainer {
 
     private isDropping:boolean = false;
 
+    private txtNextRow?:Text;
+
     ans: Array<Array<NodeObject>> = [];
     private ansBound: {
         x: number, y: number, w: number, h: number,
@@ -54,8 +56,19 @@ export class GameSceneContainer extends ScreenBaseContainer {
         this.hintNode = new NodeObject();
         this.hintNode.eventMode = 'none';
         this.addChild(this.hintNode);
+
+        this.txtNextRow = new Text(`Next Row in : ${this.gameData.step}`);
+        this.txtNextRow.anchor.set(1.0, 0);
+        this.txtNextRow.x = 620;
+        this.txtNextRow.y = 20;
+        this.addChild(this.txtNextRow);
     }
 
+    private updateStep(newStep:number){
+        this.gameData.step = Math.max(newStep, 0);
+        this.txtNextRow!.text = `Next Row in : ${this.gameData.step}`;
+
+    }
     override screenInited(): void {
         this.resetGame();
     }
@@ -94,7 +107,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
             }
         }
 
-        this.gameData.step = Helper.GetRandomNumber(10, 10);
+        this.update(Helper.GetRandomNumber(10, 10));
         this.randomInit();
     }
 
@@ -160,7 +173,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
     // check need or not insert row and gameover if no space to add row
     // check the result of every step made, 0 - normal, 1 - created new row, -1 - game over
     private moreStep() : number{
-        this.gameData.step--;
+        this.updateStep(this.gameData.step-1);
         let _res: number = 0;
         if(this.gameData.step <= 0){
             if(this.isFullFilled()){
