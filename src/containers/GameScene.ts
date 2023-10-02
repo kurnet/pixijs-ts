@@ -30,6 +30,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
 
     private isDropping:boolean = false;
 
+    private txtScore?: Text;
     private txtNextRow?:Text;
 
     ans: Array<Array<NodeObject>> = [];
@@ -62,6 +63,10 @@ export class GameSceneContainer extends ScreenBaseContainer {
         this.txtNextRow.x = 620;
         this.txtNextRow.y = 20;
         this.addChild(this.txtNextRow);
+
+        this.txtScore = new Text('');
+        this.txtScore.position.set(20, 20);
+        this.addChild(this.txtScore);
     }
 
     private updateStep(newStep:number){
@@ -123,6 +128,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
         }
 
         this.updateStep(Helper.GetRandomNumber(10, 10));
+        this.updateScore(0);
         this.randomInit();
     }
 
@@ -465,9 +471,21 @@ export class GameSceneContainer extends ScreenBaseContainer {
             _close++;
         }
 
-        // this.addScore(this.gameData.multiply * this.gameData.baseScore);
+        this.addScore(this.gameData.multiply * this.gameData.baseScore);
     };
 
+    private addScore(amount:number){
+        if(this.gameData.isStarted){
+            this.updateScore(this.gameData.score + amount);
+        }        
+    }
+
+    private updateScore(newVal:number){
+        this.gameData.score = newVal;
+        if(this.txtScore){
+            this.txtScore.text = `Score : ${this.gameData.score}`;
+        }
+    }
     override update(_: number): void {
         Group.shared.update();
     }
