@@ -1,5 +1,5 @@
 // import { Helper } from "../helper/helper";
-import { Application, DisplayObjectEvents, FederatedPointerEvent, Point, Text, TextStyle } from "pixi.js";
+import { Application, Container, DisplayObjectEvents, FederatedPointerEvent, Point, Text, TextStyle } from "pixi.js";
 import { Helper } from "../helper/helper";
 import { NodeObject } from "../object/NodeObject";
 import { ScreenBaseContainer } from "./SceneBase"
@@ -33,7 +33,8 @@ export class GameSceneContainer extends ScreenBaseContainer {
     private txtScore?: Text;
     private txtNextRow?:Text;
 
-    ans: Array<Array<NodeObject>> = [];
+    private gridArea: Container = new Container();
+    private ans: Array<Array<NodeObject>> = [];
     private ansBound: {
         x: number, y: number, w: number, h: number,
     } = { x: 0, y: 0, w: 0, h: 0 };
@@ -43,12 +44,12 @@ export class GameSceneContainer extends ScreenBaseContainer {
         
         this.nodePercent = new NodeData(node_precent);
 
-        this.on('pointerdown', this.onMouseDown);
-        this.eventMode = "static";
-        this.cursor = "pointer";
+        this.gridArea.eventMode = "static";
+        this.gridArea.cursor = "pointer";
+        this.gridArea.on('pointerdown', this.onMouseDown.bind(this));
+        this.addChild(this.gridArea);
 
         this.hintNode = new NodeObject();
-        this.hintNode.eventMode = 'none';
         this.hintNode.setVal(1);        
         this.hintNode.position.set(150, 165);
         this.addChild(this.hintNode);
@@ -67,6 +68,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
         this.txtScore = new Text('');
         this.txtScore.position.set(20, 20);
         this.addChild(this.txtScore);
+
     }
 
     private updateStep(newStep:number){
@@ -123,7 +125,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
 
                 this.ans[j][i] = _node;
 
-                this.addChild(_node);
+                this.gridArea.addChild(_node);
             }
         }
 
