@@ -100,7 +100,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
 
     // get the mouse/touch to raycast the Gird for drop node
     onMouseDown(e: FederatedPointerEvent) {
-        if(this.isDropping) return;
+        if(this.isDropping || !this.gameData.isStarted) return;
 
         const mousePt = { x: e.screenX, y: e.screenY };
         console.log(`${mousePt.x}/${mousePt.y}\n${JSON.stringify(this.ansBound)}`);
@@ -160,56 +160,57 @@ export class GameSceneContainer extends ScreenBaseContainer {
         return 0;
     }
 
-    // // check need or not insert row and gameover if no space to add row
-    // // check the result of every step made, 0 - normal, 1 - created new row, -1 - game over
-    // private moreStep() : number{
-    //     this.gameData.step--;
-    //     let _res: number = 0;
-    //     if(this.gameData.step <= 0){
-    //         if(this.isFullFilled()){
-    //             _res = -1;
-    //         }else{
-    //             this.gameData.level++;
-    //             let _nextStep = Math.max(Helper.GetRandomNumber(10, 10) - this.gameData.level, 5);
-    //             this.gameData.step = _nextStep;
-    //             this.insertRow();
-    //             _res = 1;
-    //         }
-    //     }else{
-    //         if(this.gameData.UsedBlock == Core.MAX_BLOCK * Core.MAX_BLOCK){
-    //             _res = -1;
-    //         }
-    //     }
-    //     this.txtStep.text = "Step : " + this.gameData.step;
-    //     return _res;
-    // }
+    // check need or not insert row and gameover if no space to add row
+    // check the result of every step made, 0 - normal, 1 - created new row, -1 - game over
+    private moreStep() : number{
+        this.gameData.step--;
+        let _res: number = 0;
+        if(this.gameData.step <= 0){
+            if(this.isFullFilled()){
+                _res = -1;
+            }else{
+                this.gameData.level++;
+                let _nextStep = Math.max(Helper.GetRandomNumber(10, 10) - this.gameData.level, 5);
+                this.gameData.step = _nextStep;
+                this.insertRow();
+                _res = 1;
+            }
+        }else{
+            if(this.gameData.UsedBlock == GameSceneContainer.MAX_BLOCK * GameSceneContainer.MAX_BLOCK){
+                _res = -1;
+            }
+        }
+        console.log(`Step : ${this.gameData.step}`);
+        // this.txtStep.text = "Step : " + this.gameData.step;
+        return _res;
+    }
 
-    // // shift up the node and insert at the bottom
-    // private insertRow() {
-    //     let x:number, y:number;
-    //     for(x = 0; x < GameSceneContainer.MAX_BLOCK; ++x){
-    //         for(y = 5; y >= 0; --y){
-    //             if(y == 0){
-    //                 this.ans[x][y+1].setVal(this.ans[x][y].Val, true);
-    //                 this.ans[x][y].setVal(Helper.GetRandomNumber(2, 8));
-    //                 this.gameData.UsedBlock++;
-    //             }else{
-    //                 this.ans[x][y+1].setVal(this.ans[x][y].Val, true);
-    //             }
-    //         }
-    //     }
-    // }
+    // shift up the node and insert at the bottom
+    private insertRow() {
+        let x:number, y:number;
+        for(x = 0; x < GameSceneContainer.MAX_BLOCK; ++x){
+            for(y = 5; y >= 0; --y){
+                if(y == 0){
+                    this.ans[x][y+1].setVal(this.ans[x][y].Val, true);
+                    this.ans[x][y].setVal(Helper.GetRandomNumber(2, 8));
+                    this.gameData.UsedBlock++;
+                }else{
+                    this.ans[x][y+1].setVal(this.ans[x][y].Val, true);
+                }
+            }
+        }
+    }
 
-    // // check full stacked node
-    // private isFullFilled() : boolean {
-    //     let x : number;
-    //     for(x = 0; x < GameSceneContainer.MAX_BLOCK; ++x){
-    //         if(this.ans[x][6].Val != 0){
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
+    // check full stacked node
+    private isFullFilled() : boolean {
+        let x : number;
+        for(x = 0; x < GameSceneContainer.MAX_BLOCK; ++x){
+            if(this.ans[x][6].Val != 0){
+                return true;
+            }
+        }
+        return false;
+    }
 
     // drop the node at the specfic column
     private dropNode (x : number, num : number) : boolean {
@@ -280,23 +281,23 @@ export class GameSceneContainer extends ScreenBaseContainer {
             setTimeout(_game.scanPuzzleNeedToSolve, 200, _game);
         } else {
             _game.genNext();
-            // let _gameStatus : number = this.moreStep();
-            // if(!_gameStatus){
-            //     // happen nothing if the step is not yet need to insert row
-            //     this.gameData.multiply = 1;
-            //     this.BlockerEntity.enabled = false;
-            //     this.genNext();
+            let _gameStatus : number = _game.moreStep();
+            if(!_gameStatus){
+                // happen nothing if the step is not yet need to insert row
+                _game.gameData.multiply = 1;
+                // this.BlockerEntity.enabled = false;
+                _game.genNext();
 
-            //     if(!this.gameData.isStarted){ this.gameData.isStarted = true; }
-            // }else if(_gameStatus == 1){
-            //     // insert row at the bottom and scan puzzle again
-            //     this.scanPuzzleNeedToSolve(this);
-            // }else{
-            //     // no more row can insert or full board dropped make the game over
-            //     this.gameData.isStarted = false;
-            //     this.sharedUIMgr.showGameOver(true);
-            //     //Game Over
-            // }
+                if(!_game.gameData.isStarted){ _game.gameData.isStarted = true; }
+            }else if(_gameStatus == 1){
+                // insert row at the bottom and scan puzzle again
+                _game.scanPuzzleNeedToSolve(_game);
+            }else{
+                // no more row can insert or full board dropped make the game over
+                _game.gameData.isStarted = false;
+                // this.sharedUIMgr.showGameOver(true);
+                //Game Over
+            }
         }
     }
 
