@@ -24,6 +24,17 @@
 		}
 
 		#pixi-canvas {
+			top: 50%;
+			position: relative;
+			transform: translateY(-50%);
+		}
+
+		.fit-width {
+			width: 100% !important;
+			height: auto !important;
+		}
+
+		.fit-height {
 			width: auto !important;
 			height: 100% !important;
 		}
@@ -35,5 +46,30 @@
 	<noscript>Please enable JavaScript in your web browser to view this page.</noscript>
 	<div id="pixi-content"><canvas id="pixi-canvas" /></div>
 </body>
+
+<script>
+	const adjustCanvas = ()=>{
+		const win_w = window.innerWidth;
+		const win_h = window.innerHeight;
+
+		const pj_canvas = document.getElementById("pixi-canvas");
+		if(win_h < win_w){
+			pj_canvas.classList.remove("fit-width");
+			pj_canvas.classList.add("fit-height");
+		}else{
+			pj_canvas.classList.remove("fit-height");
+			pj_canvas.classList.add("fit-width");
+		}
+	}
+
+	window.onresize = ()=>{
+		adjustCanvas();
+	}
+
+	window.onload = ()=>{
+		adjustCanvas();
+	}
+
+</script>
 
 </html>
