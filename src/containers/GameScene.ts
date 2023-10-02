@@ -129,6 +129,10 @@ export class GameSceneContainer extends ScreenBaseContainer {
             }
         }
 
+        if(this.hintNode){
+            this.hintNode.visible = false;
+        }
+        
         this.updateStep(Helper.GetRandomNumber(10, 10));
         this.updateScore(0);
         this.randomInit();
