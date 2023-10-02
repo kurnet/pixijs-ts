@@ -312,7 +312,6 @@ export class GameSceneContainer extends ScreenBaseContainer {
                 this.scanPuzzleNeedToSolve();
             }, 300);
         } else {
-            this.genNext();
             let _gameStatus : number = this.moreStep();
             if(!_gameStatus){
                 // happen nothing if the step is not yet need to insert row
