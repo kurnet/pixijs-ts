@@ -103,13 +103,10 @@ export class GameSceneContainer extends ScreenBaseContainer {
         if(this.isDropping || !this.gameData.isStarted) return;
 
         const mousePt = { x: e.screenX, y: e.screenY };
-        console.log(`${mousePt.x}/${mousePt.y}\n${JSON.stringify(this.ansBound)}`);
         const gird = { x: 0, y: 0 };
 
         gird.x = Math.floor((mousePt.x - this.ansBound.x) / GameSceneContainer.NODE_SIZE);
         gird.y = Math.floor((this.ansBound.y - mousePt.y) / GameSceneContainer.NODE_SIZE) + 1;
-
-        console.log(`${gird.x} / ${gird.y}`);
 
         if(this.dropNode(gird.x, this.gameData.nextVal)){
             this.hintNode!.visible = false;
@@ -180,7 +177,6 @@ export class GameSceneContainer extends ScreenBaseContainer {
                 _res = -1;
             }
         }
-        console.log(`Step : ${this.gameData.step}`);
         // this.txtStep.text = "Step : " + this.gameData.step;
         return _res;
     }
