@@ -1,4 +1,4 @@
-import { Color, Container, Point, Sprite, Texture } from "pixi.js";
+import { Color, Container, Point, Sprite, Texture, Assets } from "pixi.js";
 import { Helper } from "../helper/helper";
 
 export interface OnCompleted {
@@ -9,6 +9,22 @@ type AnimeData = {
     target?: Point,
     duration : number;
     time : number;
+}
+
+export const preLoadCard = ()=>{
+    const cardAssets:string[] = [];
+    for(let vi = 1; vi <= 9; ++ vi){
+        const assetName = `Card${vi}`;
+        Assets.add(assetName, `num${vi}.png`);
+        cardAssets.push(assetName);
+    }
+    return new Promise<boolean>((resolve, reject)=>{
+        Assets.load(cardAssets).then(()=>{
+            resolve(true);
+        }).catch(()=>{
+            reject();
+        });
+    });
 }
 
 export class NodeObject extends Container{

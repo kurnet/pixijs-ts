@@ -299,9 +299,9 @@ export class GameSceneContainer extends ScreenBaseContainer {
         }
 
         // should be animation play when found detected node to solve
-        setTimeout(()=>{
+        Helper.TimeoutPromise(300).then(()=>{
             this.processMarkedNode();
-        }, 300);
+        });
     }
 
     // remove and sort the empty space out
@@ -312,9 +312,10 @@ export class GameSceneContainer extends ScreenBaseContainer {
             // if any change made on the board have to scan puzzle again until nothing change, and score got multiply
             this.gameData.multiply += 4;
 
-            setTimeout(()=>{
+            Helper.TimeoutPromise(300).then(()=>{
                 this.scanPuzzleNeedToSolve();
-            }, 300);
+            });
+
         } else {
             let _gameStatus : number = this.moreStep();
             if(!_gameStatus){
@@ -344,11 +345,11 @@ export class GameSceneContainer extends ScreenBaseContainer {
                 txtGameOver.position.set(this.screenWidth/2, this.screenHeight/2);
                 this.addChild(txtGameOver);
 
-                setTimeout(()=>{
+                Helper.TimeoutPromise(2000).then(()=>{
                     this.emit(EVT_GAME_DONE);
 
                     txtGameOver.destroy();
-                }, 2000);
+                });
                 
                 // this.sharedUIMgr.showGameOver(true);
                 //Game Over
