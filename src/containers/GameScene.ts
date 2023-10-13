@@ -5,7 +5,7 @@ import { NodeObject } from "../object/NodeObject";
 import { ScreenBaseContainer } from "./SceneBase"
 import { NodeData } from "../data/nodeData";
 import node_precent from '../data/node_precent.json';
-import { Easing, Group, Tween } from "tweedle.js";
+import { Easing, Tween } from "tweedle.js";
 
 interface CoreData {
     score: number,
@@ -493,6 +493,6 @@ export class GameSceneContainer extends ScreenBaseContainer {
         }
     }
     override update(_: number): void {
-        Group.shared.update();
+        super.update(_);        
     }
 }

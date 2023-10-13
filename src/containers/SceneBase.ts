@@ -1,4 +1,5 @@
 import { Application, Container } from "pixi.js";
+import { Group } from "tweedle.js";
 
 export class ScreenBaseContainer extends Container {
     protected screenWidth:number;
@@ -19,5 +20,7 @@ export class ScreenBaseContainer extends Container {
     addedToScreen():void { 
     }
 
-    update(_:number) { }
+    update(_:number) {         
+        Group.shared.update();
+    }
 }

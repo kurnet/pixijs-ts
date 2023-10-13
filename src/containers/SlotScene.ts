@@ -1,5 +1,6 @@
 import { Assets, BlurFilter, Container, Graphics, Sprite, TextStyle, Texture, Text } from "pixi.js";
 import { ScreenBaseContainer } from "./SceneBase";
+import { Easing, Tween } from "tweedle.js";
 
 
 interface IReel{
@@ -14,6 +15,9 @@ const REEL_WIDTH = 160;
 const SYMBOL_SIZE = 150;
 
 export class SlotScene extends ScreenBaseContainer {
+    private reels:IReel[] = [];
+    private slotTextures:Texture[] = [];
+    private running:boolean = false;
     
     override screenInited(): void {
         super.screenInited();
@@ -34,7 +38,7 @@ export class SlotScene extends ScreenBaseContainer {
     private onAssetsLoaded()
     {
         // Create different slot symbols.
-        const slotTextures = [
+        this.slotTextures = [
             Texture.from('https://pixijs.com/assets/eggHead.png'),
             Texture.from('https://pixijs.com/assets/flowerTop.png'),
             Texture.from('https://pixijs.com/assets/helmlok.png'),
@@ -42,7 +46,6 @@ export class SlotScene extends ScreenBaseContainer {
         ];
 
         // Build the reels
-        const reels:IReel[] = [];
         const reelContainer = new Container();
 
         for (let i = 0; i < 5; i++)
@@ -67,7 +70,7 @@ export class SlotScene extends ScreenBaseContainer {
             // Build the symbols
             for (let j = 0; j < 4; j++)
             {
-                const symbol = new Sprite(slotTextures[Math.floor(Math.random() * slotTextures.length)]);
+                const symbol = new Sprite(this.slotTextures[Math.floor(Math.random() * this.slotTextures.length)]);
                 // Scale the symbol to fit symbol area.
 
                 symbol.y = j * SYMBOL_SIZE;
@@ -76,7 +79,7 @@ export class SlotScene extends ScreenBaseContainer {
                 reel.symbols.push(symbol);
                 rc.addChild(symbol);
             }
-            reels.push(reel);
+            this.reels.push(reel);
         }
         this.addChild(reelContainer);
 
@@ -133,27 +136,10 @@ export class SlotScene extends ScreenBaseContainer {
         bottom.cursor = 'pointer';
         bottom.addListener('pointerdown', () =>
         {
-            // startPlay();
+            this.startPlay();
         });
 
         // let running = false;
-
-        // // Function to start playing.
-        // function startPlay()
-        // {
-        //     if (running) return;
-        //     running = true;
-
-        //     for (let i = 0; i < reels.length; i++)
-        //     {
-        //         const r = reels[i];
-        //         const extra = Math.floor(Math.random() * 3);
-        //         const target = r.position + 10 + i * 5 + extra;
-        //         const time = 2500 + i * 600 + extra * 600;
-
-        //         tweenTo(r, 'position', target, time, backout(0.5), null, i === reels.length - 1 ? reelsComplete : null);
-        //     }
-        // }
 
         // // Reels done handler.
         // function reelsComplete()
@@ -192,6 +178,65 @@ export class SlotScene extends ScreenBaseContainer {
         //         }
         //     }
         // });
+    }
+
+    // Function to start playing.
+    private startPlay()
+    {
+        if (this.running) return;
+        this.running = true;
+
+        for (let i = 0; i < this.reels.length; i++)
+        {
+            const r = this.reels[i];
+            const extra = Math.floor(Math.random() * 3);
+            const target = r.position + 10 + i * 5 + extra;
+            const time = 2500 + i * 600 + extra * 600;
+
+            const tween =  new Tween(r).to({position:target}, time).easing(Easing.Back.Out);
+            if(i === this.reels.length - 1){
+                tween.onComplete(() => { 
+                    this.running = false; 
+                    console.log("Ended"); 
+                });
+                console.log("Started");
+            }
+            tween.start();
+            // tweenTo(r, 'position', target, time, backout(0.5), null, i === reels.length - 1 ? reelsComplete : null);
+        }
+    }
+    
+    private onReelUpdate(_:number):void{
+        for (let i = 0; i < this.reels.length; i++)
+        {
+            const r = this.reels[i];
+            // Update blur filter y amount based on speed.
+            // This would be better if calculated with time in mind also. Now blur depends on frame rate.
+
+            r.blur.blurY = (r.position - r.previousPosition) * 8;
+            r.previousPosition = r.position;
+        
+            // Update symbol positions on reel.
+            for (let j = 0; j < r.symbols.length; j++)
+            {
+                const s = r.symbols[j];
+                const prevy = s.y;
+        
+                s.y = ((r.position + j) % r.symbols.length) * SYMBOL_SIZE - SYMBOL_SIZE;
+                if (s.y < 0 && prevy > SYMBOL_SIZE)
+                {
+                    // Detect going over and swap a texture.
+                    // This should in proper product be determined from some logical reel.
+                    s.texture = this.slotTextures[Math.floor(Math.random() * this.slotTextures.length)];
+                    s.scale.x = s.scale.y = Math.min(SYMBOL_SIZE / s.texture.width, SYMBOL_SIZE / s.texture.height);
+                    s.x = Math.round((SYMBOL_SIZE - s.width) / 2);
+                }
+            }
+        }
+    }
+    override update(_: number): void {
+        super.update(_);
+        this.onReelUpdate(_);
     }
 }
 
