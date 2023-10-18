@@ -64,7 +64,7 @@ export class MainMenuContainer extends ScreenBaseContainer {
                 this.emit(EVT_SLOT_PRESSED);
             });
 
-            const txtWater = Helper.CreateCentredText("Watermelon", true);
+            const txtWater = Helper.CreateCentredText("Test Phy", true);
             txtWater.position.set(this.screenWidth /2, txtSlot.position.y + 50);
             this.addChild(txtWater);
 
