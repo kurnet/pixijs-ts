@@ -76,13 +76,13 @@ export class GameSceneContainer extends ScreenBaseContainer {
         this.txtNextRow!.text = `Next Row in : ${this.gameData.step}`;
 
     }
-    override screenInited(): void {
-        super.screenInited();
+    override onInit(): void {
+        super.onInit();
         this.resetGame();
     }
 
-    override addedToScreen(): void {
-        super.addedToScreen();
+    override onAdded(): void {
+        super.onAdded();
         this.resetGame();
     }
 
@@ -492,7 +492,7 @@ export class GameSceneContainer extends ScreenBaseContainer {
             this.txtScore.text = `Score : ${this.gameData.score}`;
         }
     }
-    override update(_: number): void {
-        super.update(_);        
+    override onFrameUpdated(_: number): void {
+        super.onFrameUpdated(_);        
     }
 }

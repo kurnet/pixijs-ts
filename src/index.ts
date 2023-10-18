@@ -1,9 +1,11 @@
 import { Application } from 'pixi.js'
 import { EVT_GAME_DONE, GameSceneContainer } from './containers/GameScene';
-import { EVT_SLOT_PRESSED, EVT_START_PRESSED, MainMenuContainer } from './containers/MenuScene';
+import { EVT_SLOT_PRESSED, EVT_START_PRESSED, EVT_WATER_PRESSED, MainMenuContainer } from './containers/MenuScene';
 import { preLoadCard } from './object/NodeObject';
 import { SlotScene } from './containers/SlotScene';
 import { ScreenBaseContainer } from './containers/SceneBase';
+import { WaterGameScene } from './containers/WaterGameScene';
+import { Group } from 'tweedle.js';
 
 const eleCanvas = document.getElementById("pixi-canvas") as HTMLCanvasElement;
 
@@ -40,7 +42,8 @@ cardLoading.then(()=>{
 // app.stage.addChild(gameScene);
 
 app.ticker.add((_ => {
-	scenes.forEach(s => s.update(app.ticker.deltaMS))
+	Group.shared.update();
+	scenes.forEach(s => s.onFrameUpdated(app.ticker.deltaMS))
 }));
 
 menuScene.on(EVT_START_PRESSED, () => {	
@@ -55,5 +58,12 @@ scenes.push(slotScene);
 menuScene.on(EVT_SLOT_PRESSED, ()=>{
 	app.stage.addChild(slotScene);
 	app.stage.removeChild(menuScene);
-})
+});
+
+const waterScene = new WaterGameScene(app);
+scenes.push(waterScene);
+menuScene.on(EVT_WATER_PRESSED, ()=>{
+	app.stage.addChild(waterScene);
+	app.stage.removeChild(menuScene);
+});
 

@@ -4,10 +4,11 @@ import { Helper } from "../helper/helper";
 
 export const EVT_START_PRESSED = "evt_start_pressed" as (keyof DisplayObjectEvents);
 export const EVT_SLOT_PRESSED = "evt_slot_pressed" as (keyof DisplayObjectEvents);
+export const EVT_WATER_PRESSED = "evt_water_pressed" as (keyof DisplayObjectEvents);
 
 export class MainMenuContainer extends ScreenBaseContainer {
-    override screenInited() {
-        super.screenInited();
+    override onInit() {
+        super.onInit();
         
         Assets.add('btnPlay0', "btnPlayNormal.png");
         Assets.add('btnPlay1', "btnPlayPressed.png");
@@ -62,6 +63,15 @@ export class MainMenuContainer extends ScreenBaseContainer {
             txtSlot.on('pointerdown', ()=>{
                 this.emit(EVT_SLOT_PRESSED);
             });
+
+            const txtWater = Helper.CreateCentredText("Watermelon", true);
+            txtWater.position.set(this.screenWidth /2, txtSlot.position.y + 50);
+            this.addChild(txtWater);
+
+            txtWater.on('pointerdown', ()=>{
+                this.emit(EVT_WATER_PRESSED);
+            })
+
 
         });
     }

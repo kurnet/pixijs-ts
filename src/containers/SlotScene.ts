@@ -19,8 +19,8 @@ export class SlotScene extends ScreenBaseContainer {
     private slotTextures:Texture[] = [];
     private running:boolean = false;
     
-    override screenInited(): void {
-        super.screenInited();
+    override onInit(): void {
+        super.onInit();
 
         
         Assets.load([
@@ -31,8 +31,8 @@ export class SlotScene extends ScreenBaseContainer {
         ]).then(this.onAssetsLoaded.bind(this));
     }
 
-    override addedToScreen(): void {
-        super.addedToScreen();
+    override onAdded(): void {
+        super.onAdded();
     }
 
     private onAssetsLoaded()
@@ -234,8 +234,8 @@ export class SlotScene extends ScreenBaseContainer {
             }
         }
     }
-    override update(_: number): void {
-        super.update(_);
+    override onFrameUpdated(_: number): void {
+        super.onFrameUpdated(_);
         this.onReelUpdate(_);
     }
 }
