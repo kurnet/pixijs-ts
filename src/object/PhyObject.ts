@@ -1,4 +1,5 @@
 import { Color, Graphics } from "pixi.js";
+import { Helper } from "../helper/helper";
 
 export interface IVector2D{
     x:number,
@@ -32,7 +33,16 @@ export class PhyObject extends Graphics {
 
     public draw():void{
         this.clear();
-        this.beginFill(new Color("red").toArray(), 1);
+        const color = Helper.GetRandomNumber(10, 0);
+        let fillColor:Color;
+        if(color < 3){
+            fillColor = new Color("red");
+        }else if (color < 6){
+            fillColor = new Color("yellow");
+        }else{
+            fillColor = new Color("blue");
+        }
+        this.beginFill(fillColor.toArray(), 1);
         this.drawCircle(0, 0, this._radius);
     }
 

@@ -23,8 +23,15 @@ export class WaterGameScene extends ScreenBaseContainer{
         playArea.eventMode = "static";
         playArea.cursor = "pointer";
         playArea.on('pointerdown', (evt)=>{
-            this.ball!.acceleration.x = 0;
-            this.ball?.position.set(evt.global.x, evt.global.y);
+            // this.ball!.acceleration.x = 0;
+            // this.ball?.position.set(evt.global.x, evt.global.y);
+
+            const ball2 = new PhyObject(Helper.GetRandomNumber(50, 10));
+            ball2.x = evt.global.x;
+            ball2.draw();
+            this.addChild(ball2);
+    
+            this.ballsPool.push(ball2);
         });
 
         this.ball = new PhyObject(10);
