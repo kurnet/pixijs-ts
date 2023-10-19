@@ -91,7 +91,7 @@ export class WaterGameScene extends ScreenBaseContainer{
                             overlapX *= (1 - ratio);
                         }
 
-                        const pow = (obj.radius / obj2.radius) * 0.5 + 2;
+                        const pow = 1;
                         force.x += Math.max(0, overlapX * pow);
                         force.y += Math.max(0, overlapY * pow);
                         if(obj.position.x > obj2.position.x){
