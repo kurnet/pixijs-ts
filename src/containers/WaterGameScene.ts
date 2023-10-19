@@ -66,15 +66,14 @@ export class WaterGameScene extends ScreenBaseContainer{
 
     override onFrameUpdated(dt: number): void {
         if(this._bound ){
-
+            this.ballsPool.forEach(obj=>obj.calForce());
             this.ballsPool.forEach(obj=>{
-                obj.calForce();
                 obj.frameUpdate(dt, this._bound!);
 
                 const extPool = this.ballsPool.filter(obj2 => obj2 !== obj);
                 extPool.forEach(obj2 =>{
                     if(this.isOverlap(obj, obj2)){
-                        const dist = this.getBallDistance(obj, obj2);
+                        // const dist = this.getBallDistance(obj, obj2);
                         let overlapX = this.getOverlapX(obj, obj2);
                         let overlapY = this.getOverlapY(obj, obj2);
                         let distX = Math.abs(obj.position.x - obj2.position.x);
@@ -82,13 +81,19 @@ export class WaterGameScene extends ScreenBaseContainer{
 
                         const force:IVector2D = {x:0, y:0};
 
-                        let ratio = Math.max(distX, distY) / dist;
+                        // let ratio = Math.max(distX, distY) / dist;
+                        // if(distX > distY){
+                        //     overlapX *= ratio; 
+                        //     overlapY *= (1 - ratio);
+                        // }else{
+                        //     overlapY *= ratio;
+                        //     overlapX *= (1 - ratio);
+                        // }
+
                         if(distX > distY){
-                            overlapX *= ratio; 
-                            overlapY *= (1 - ratio);
+                            overlapX *= distX/distY;
                         }else{
-                            overlapY *= ratio;
-                            overlapX *= (1 - ratio);
+                            overlapY *= distY/distX;
                         }
 
                         const pow = 1;

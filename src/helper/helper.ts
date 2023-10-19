@@ -24,4 +24,13 @@ export class Helper{
 
         return txt;
     }
+
+
+    public static PosToVec(pos: number): number {
+        return pos * 1 / 50;
+    }
+
+    public static VecToPos(vec: number): number {
+        return vec * 50;
+    }
 }
