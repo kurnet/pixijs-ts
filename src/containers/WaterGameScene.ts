@@ -1,6 +1,6 @@
 import { Color, Graphics } from "pixi.js";
 import { ScreenBaseContainer } from "./SceneBase";
-import { IBounds, PhyObject } from "../object/PhyObject";
+import { IBounds, IVector2D, PhyObject } from "../object/PhyObject";
 import { Helper } from "../helper/helper";
 
 export class WaterGameScene extends ScreenBaseContainer{
@@ -20,6 +20,12 @@ export class WaterGameScene extends ScreenBaseContainer{
         playArea.beginFill(new Color("green").toArray(), 1);
         playArea.drawRect(this._bound.x1, this._bound.y1, this._bound.x2 - this._bound.x1, this._bound.y2 - this._bound.y1);
         this.addChild(playArea);
+        playArea.eventMode = "static";
+        playArea.cursor = "pointer";
+        playArea.on('pointerdown', (evt)=>{
+            this.ball!.acceleration.x = 0;
+            this.ball?.position.set(evt.global.x, evt.global.y);
+        });
 
         this.ball = new PhyObject(10);
         this.ball.draw();
@@ -38,7 +44,7 @@ export class WaterGameScene extends ScreenBaseContainer{
         });
 
         for(let vi = 0; vi < 10; ++vi){
-            const ball2 = new PhyObject(Helper.GetRandomNumber(10, 10));
+            const ball2 = new PhyObject(Helper.GetRandomNumber(50, 10));
             ball2.x = Helper.GetRandomNumber(this.screenWidth, 0);
             ball2.draw();
             this.addChild(ball2);
@@ -53,36 +59,42 @@ export class WaterGameScene extends ScreenBaseContainer{
 
     override onFrameUpdated(dt: number): void {
         if(this._bound ){
+
             this.ballsPool.forEach(obj=>{
+                obj.calForce();
                 obj.frameUpdate(dt, this._bound!);
 
                 const extPool = this.ballsPool.filter(obj2 => obj2 !== obj);
                 extPool.forEach(obj2 =>{
-                    if(this.IsOverlap(obj, obj2)){
+                    if(this.isOverlap(obj, obj2)){
+                        const dist = this.getBallDistance(obj, obj2);
                         let overlapX = this.getOverlapX(obj, obj2);
                         let overlapY = this.getOverlapY(obj, obj2);
-                        
-                        if(overlapX > 0){
-                            overlapX *= 0.5;
-                            if(obj.position.x < obj2.position.x){
-                                obj.acceleration.x -= overlapX;
-                                obj2.acceleration.x += overlapX;
-                            }else{
-                                obj.acceleration.x += overlapX;
-                                obj2.acceleration.x -= overlapX;
-                            }
+                        let distX = Math.abs(obj.position.x - obj2.position.x);
+                        let distY = Math.abs(obj.position.y - obj2.position.y);
+
+                        const force:IVector2D = {x:0, y:0};
+
+                        let ratio = Math.max(distX, distY) / dist;
+                        if(distX > distY){
+                            overlapX *= ratio; 
+                            overlapY *= (1 - ratio);
+                        }else{
+                            overlapY *= ratio;
+                            overlapX *= (1 - ratio);
                         }
-    
-                        if(overlapY > 0){
-                            overlapY *= 0.5;
-                            if(obj.position.y < obj2.position.y){
-                                obj.acceleration.y -= overlapY;
-                                obj2.acceleration.y += overlapY;
-                            }else{
-                                obj.acceleration.y += overlapY;
-                                obj2.acceleration.y -= overlapY;
-                            }
+
+                        const pow = (obj.radius / obj2.radius) * 0.5 + 2;
+                        force.x += Math.max(0, overlapX * pow);
+                        force.y += Math.max(0, overlapY * pow);
+                        if(obj.position.x > obj2.position.x){
+                            force.x *= -1;
                         }
+                        if(obj.position.y > obj2.position.y){
+                            force.y *= -1;
+                        } 
+
+                        obj2.applyForce(force);
                     }
                 })
             });
@@ -101,12 +113,16 @@ export class WaterGameScene extends ScreenBaseContainer{
         
         return totalSize - distY;
     }
-    public IsOverlap(obj1:PhyObject, obj2:PhyObject):boolean{
+
+    public getBallDistance(obj1:PhyObject, obj2:PhyObject):number{
         const distX = obj1.position.x - obj2.position.x;
         const distY = obj1.position.y - obj2.position.y;
+ 
+        return Math.hypot(distX, distY);
+    }
 
-        const dist = Math.hypot(distX, distY);
-
+    public isOverlap(obj1:PhyObject, obj2:PhyObject):boolean{
+        const dist = this.getBallDistance(obj1, obj2);
         return dist < obj1.radius + obj2.radius;
     }
    
