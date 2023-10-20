@@ -1,8 +1,8 @@
-import { Color, Graphics } from "pixi.js";
+import { Color, Graphics, Text } from "pixi.js";
 import { IBounds } from "../object/PhyObject";
 import { ScreenBaseContainer } from "./SceneBase";
 import { Edge, Vec2, World } from "planck";
-import { IPhyBodyData, PhyBodyObject } from "../object/PhyBodyObject";
+import { IPhyBodyData, ObjLvData, PhyBodyObject } from "../object/PhyBodyObject";
 import { Helper } from "../helper/helper";
 
 export class WaterSceneBox2dScene extends ScreenBaseContainer {
@@ -12,6 +12,9 @@ export class WaterSceneBox2dScene extends ScreenBaseContainer {
     private phyObjs:PhyBodyObject[] = [];
      
     private matchPair:{[key:number]:PhyBodyObject} = {}
+    
+    private _nextBlock:number = 1;
+    private _nextBlockObj?:Graphics;
 
     override onInit(): void {
         super.onInit();
@@ -31,16 +34,17 @@ export class WaterSceneBox2dScene extends ScreenBaseContainer {
             // this.ball?.position.set(evt.global.x, evt.global.y);
             const anBody = this._phyWorld?.createBody({
                 type: "dynamic",
-                position: new Vec2(Helper.PosToVec(evt.global.x), Helper.PosToVec(evt.global.y))
+                position: new Vec2(Helper.PosToVec(evt.global.x), Helper.PosToVec(this._bound!.y1))
             });
 
             if(anBody){
                 const pBody = new PhyBodyObject();
-                pBody.setBody(anBody, Helper.GetRandomNumber(2, 1));
+                pBody.setBody(anBody, this._nextBlock);
     
                 this.phyObjs.push(pBody);
                 this.addChild(pBody);
 
+                this.getNextBlock();
                 // pBody.eventMode = "static";
                 // pBody.cursor = "pointer";
                 // pBody.on('pointerdown', ()=>{
@@ -49,7 +53,7 @@ export class WaterSceneBox2dScene extends ScreenBaseContainer {
             }
         });
 
-        this._phyWorld = new World({ gravity: new Vec2(0, 10) });
+        this._phyWorld = new World({ gravity: new Vec2(0, 20) });
 
         this._phyWorld.on('post-solve', (contact)=>{
             const fA = contact.getFixtureA();
@@ -79,6 +83,7 @@ export class WaterSceneBox2dScene extends ScreenBaseContainer {
         platform.createFixture({
             shape: new Edge(new Vec2(Helper.PosToVec(this._bound.x1), Helper.PosToVec(this._bound.y2)), 
             new Vec2(Helper.PosToVec(this._bound.x2), Helper.PosToVec(this._bound.y2))),
+            friction: 1,
         });
         platform.createFixture({
             shape: new Edge(new Vec2(Helper.PosToVec(this._bound.x1), Helper.PosToVec(this._bound.y1)), 
@@ -89,8 +94,37 @@ export class WaterSceneBox2dScene extends ScreenBaseContainer {
             new Vec2(Helper.PosToVec(this._bound.x2), Helper.PosToVec(this._bound.y2)))
         });
 
+        const nextText = new Text("Next : ");
+        this.addChild(nextText);
+        nextText.position.set(10, 50);
+        nextText.anchor.set(0, 0.5);
+
+        this.getNextBlock();
     }
 
+    private getNextBlock():void{
+        const _p = Helper.GetRandomNumber(100, 0);
+        if(_p < 45){
+            this._nextBlock = 1;
+        }else if(_p < 90){
+            this._nextBlock = 2;
+        }else{
+            this._nextBlock = 3;
+        }
+        
+        const lvData = ObjLvData[this._nextBlock];
+        if(lvData){
+            this._nextBlockObj?.destroy();
+            
+            this._nextBlockObj = new Graphics();
+            this._nextBlockObj.beginFill(new Color(lvData.color).toArray(), 1);
+            this._nextBlockObj.drawCircle(0, 0, 30);
+
+            this._nextBlockObj.position.set(120, 50);
+            this.addChild(this._nextBlockObj);
+        }
+
+    }
     override onFrameUpdated(_: number): void {
         const matchList = Object.entries(this.matchPair);
         if(matchList.length > 0){

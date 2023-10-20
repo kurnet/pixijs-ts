@@ -13,13 +13,13 @@ export interface ILevelData {
     color: string,
 }
 
-const objLv:{[key:number]:ILevelData} = {};
-objLv[1] = {color: "red", size: 10};
-objLv[2] = {color: "white", size: 20};
-objLv[3] = {color: "blue", size: 30};
-objLv[4] = {color: "yellow", size: 40};
-objLv[5] = {color: "black", size: 50};
-objLv[6] = {color: "grey", size: 60};
+export const ObjLvData:{[key:number]:ILevelData} = {};
+ObjLvData[1] = {color: "red", size: 30};
+ObjLvData[2] = {color: "white", size: 40};
+ObjLvData[3] = {color: "blue", size: 60};
+ObjLvData[4] = {color: "yellow", size: 90};
+ObjLvData[5] = {color: "black", size: 130};
+ObjLvData[6] = {color: "grey", size: 170};
 
 export class PhyBodyObject extends Graphics{
     private static _count:number = 1;
@@ -35,7 +35,7 @@ export class PhyBodyObject extends Graphics{
 
         this.clear();
 
-        const lvData = objLv[lv];
+        const lvData = ObjLvData[lv];
         if(lvData){
             this._lv = lv;
             this.setSize( lvData.size);
@@ -56,13 +56,13 @@ export class PhyBodyObject extends Graphics{
 
         this._body?.createFixture({
             shape: new Circle(Helper.PosToVec(size)),
-            density: 1.0,
+            density: 1.0 + 0.2 * this._lv,
             friction: 0.3,
             userData: usrData,
         });
         
         this.clear();
-        this.beginFill(new Color(objLv[this._lv].color).toArray(), 1);
+        this.beginFill(new Color(ObjLvData[this._lv].color).toArray(), 1);
         this.drawCircle(0, 0, size);
     }
 
@@ -74,7 +74,7 @@ export class PhyBodyObject extends Graphics{
     
     public levelUp(): boolean{
         const nextLv = this._lv + 1;
-        const lvData = objLv[nextLv];
+        const lvData = ObjLvData[nextLv];
         if(lvData){
             this._lv = nextLv;
             this.setSize(lvData.size);
