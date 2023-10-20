@@ -20,7 +20,7 @@ export class MainMenuContainer extends ScreenBaseContainer {
             this.addChild(btnPlay);
     
             btnPlay.x = this.screenWidth / 2;
-            btnPlay.y = this.screenHeight * 0.6;
+            btnPlay.y = this.screenHeight * 0.5;
     
             btnPlay.scale.set(0.5, 0.5);
             btnPlay.anchor.set(0.5, 0.5);
@@ -45,7 +45,7 @@ export class MainMenuContainer extends ScreenBaseContainer {
             });
             const txtStart = new Text('Start', style);
             txtStart.anchor.set(0.5, 0.5);
-            txtStart.position.set(this.screenWidth/2, this.screenHeight/2);
+            txtStart.position.set(this.screenWidth/2, this.screenHeight * 0.4);
             this.addChild(txtStart);
 
 
@@ -64,7 +64,10 @@ export class MainMenuContainer extends ScreenBaseContainer {
                 this.emit(EVT_SLOT_PRESSED);
             });
 
-            const txtWater = Helper.CreateCentredText("Test Phy", true);
+            const phyStyle = Object.assign({}, slotStyle);
+            phyStyle.fill = "#ffff33";
+
+            const txtWater = Helper.CreateCentredText("Test Physics with Planck", true, phyStyle);
             txtWater.position.set(this.screenWidth /2, txtSlot.position.y + 50);
             this.addChild(txtWater);
 
