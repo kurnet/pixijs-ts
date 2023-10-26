@@ -19,8 +19,8 @@ export class WaterSceneBox2dScene extends ScreenBaseContainer {
     override onInit(): void {
         super.onInit();
         this._bound = {
-            x1: 20, y1: 100,
-            x2: this.screenWidth - 20, y2: this.screenHeight - 100,
+            x1: this.screenWidth * 0.058, y1: this.screenHeight * 0.38,
+            x2: this.screenWidth * 0.942, y2: this.screenHeight * 0.94,
         }
 
         const assetList:UnresolvedAsset[] = [];
@@ -30,9 +30,17 @@ export class WaterSceneBox2dScene extends ScreenBaseContainer {
                 src: `hk_assets/game_icon${vi}.png`,
             });
         }
+        assetList.push({
+            alias: `bg`,
+            src: 'hk_assets/indieGame2a.jpg',
+        });
         Assets.load(assetList).then(()=>{
+            const bgImg = Sprite.from('bg');
+            bgImg.scale.set(0.5);
+            this.addChild(bgImg);
+
             const playArea = new Graphics();
-            playArea.beginFill(new Color("green").toArray(), 1);
+            playArea.beginFill(new Color("green").toArray(), 0.5);
             playArea.drawRect(this._bound.x1, this._bound.y1, this._bound.x2 - this._bound.x1, this._bound.y2 - this._bound.y1);
             this.addChild(playArea);
             playArea.eventMode = "static";

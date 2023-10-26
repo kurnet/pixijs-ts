@@ -1,4 +1,4 @@
-import { Color, Graphics, Sprite } from "pixi.js";
+import { Container, Sprite } from "pixi.js";
 import { Body, Circle } from "planck";
 import { Helper } from "../helper/helper";
 
@@ -27,7 +27,7 @@ ObjLvData[9] = { color: "grey", size: 190, asset: "icon9" };
 ObjLvData[10] = { color: "grey", size: 220, asset: "icon10" };
 ObjLvData[11] = { color: "grey", size: 290, asset: "icon11" };
 
-export class PhyBodyObject extends Graphics {
+export class PhyBodyObject extends Container {
     private static _count: number = 1;
 
     private _lv: number = 0;
@@ -39,7 +39,9 @@ export class PhyBodyObject extends Graphics {
     public setBody(body: Body, lv: number) {
         this._body = body;
 
-        this.clear();
+        this._body.setAngularDamping(1);
+
+        // this.clear();
 
         const lvData = ObjLvData[lv];
         if (lvData) {
@@ -67,11 +69,11 @@ export class PhyBodyObject extends Graphics {
             userData: usrData,
         });
 
-        this.clear();
+        // this.clear();
         this.removeChildren();
 
-        this.beginFill(new Color(ObjLvData[this._lv].color).toArray(), 0);
-        this.drawCircle(0, 0, size);
+        // this.beginFill(new Color(ObjLvData[this._lv].color).toArray(), 1);
+        // this.drawCircle(0, 0, size);
         
         const pic = Sprite.from(ObjLvData[this._lv].asset);
         pic.scale.set(0.5);
