@@ -14,8 +14,8 @@ const app = new Application({
 	resolution: window.devicePixelRatio || 1,
 	autoDensity: true,
 	backgroundColor: 0x6495ed,
-	width: 640,
-	height: 900,
+	width: 1080,
+	height: 1920,
 });
 
 const scenes:ScreenBaseContainer[] = [];
